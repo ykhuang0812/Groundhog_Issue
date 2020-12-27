@@ -119,7 +119,7 @@ void Between(vector<RouteUser> &data, time_t ltimestamp , time_t utimestamp) {
 
 int main(){
     vector<RouteUser> data[2]; // 0:route_user_1.csv  1:route_user2.csv
-    vector<string> filename = {"route_user_1.csv", "route_user_2.csv"};
+    vector<string> filename = {"../data/route_user_1.csv", "../data/route_user_2.csv"};
     for (int i = 0; i < 2; i++) {
         if (ParseCSV(filename[i],data[i]) < 0) {
             cout << "Parse " << filename[i] << " failed.\n";
