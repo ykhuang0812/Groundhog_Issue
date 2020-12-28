@@ -27,6 +27,13 @@
     "clang.completion.enable": true,
     "files.associations": {
       "iostream": "cpp",
-      "iosfwd": "cpp"
+      "iosfwd": "cpp",
+      "array": "cpp",
+      "deque": "cpp",
+      "string": "cpp",
+      "unordered_map": "cpp",
+      "vector": "cpp",
+      "string_view": "cpp",
+      "initializer_list": "cpp"
     }
   }
