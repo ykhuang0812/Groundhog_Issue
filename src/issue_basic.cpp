@@ -19,7 +19,7 @@ public:
     double lat;
 };
 
-class UserData{
+class UserData {
 private:
     vector<RouteUser> data={};
 public:
@@ -43,10 +43,10 @@ time_t StrtoTimeStamp(string datetime) {
 
     tm.tm_year = stoi(datetime.substr(0, 4)) - 1900;
     tm.tm_mon = stoi(datetime.substr(5, 2)) - 1;
-	tm.tm_mday = stoi(datetime.substr(8, 2));
-	tm.tm_hour = stoi(datetime.substr(11, 2));
-	tm.tm_min = stoi(datetime.substr(14, 2));
-	tm.tm_sec = stoi(datetime.substr(17, 2));
+    tm.tm_mday = stoi(datetime.substr(8, 2));
+    tm.tm_hour = stoi(datetime.substr(11, 2));
+    tm.tm_min = stoi(datetime.substr(14, 2));
+    tm.tm_sec = stoi(datetime.substr(17, 2));
 
     return mktime(&tm);
 }
@@ -83,23 +83,23 @@ void UserData::PrintData() {
 
 int UserData::SearchPosition(time_t timestamp, int bound) { // op -> 0: return lower bound , 1: return upper bound
     int l = 0, h = data.size() - 1;
-    switch(bound){
+    switch (bound) {
         case LOWER_BOUND:
-            while(l <= h){
+            while (l <= h) {
                 int m = l + (h - l) / 2;
                 if (data[m].timestamp < timestamp) {
                     l = m + 1;
-                } else if (data[m].timestamp >= timestamp){
+                } else if (data[m].timestamp >= timestamp) {
                     h = m - 1;
                 }
             }
             break;
         case UPPER_BOUND:
-            while(l <= h){
+            while (l <= h) {
                 int m = l + (h - l) / 2;
                 if (data[m].timestamp <= timestamp) {
                     l = m + 1;
-                } else if (data[m].timestamp > timestamp){
+                } else if (data[m].timestamp > timestamp) {
                     h = m - 1;
                 }
             }
@@ -133,11 +133,11 @@ void UserData::Between(time_t ltimestamp , time_t utimestamp) {
     return;
 }
 
-void UserData::SortData(){
+void UserData::SortData() {
     sort(data.begin(), data.end(), [&](RouteUser x, RouteUser y) { return x.timestamp < y.timestamp; });
 }
 
-int main(){
+int main() {
     UserData UserData[2]; // 0:route_user_1.csv  1:route_user2.csv
     vector<string> filename = {"../data/route_user_1.csv", "../data/route_user_2.csv"};
     for (int i = 0; i < 2; i++) {
