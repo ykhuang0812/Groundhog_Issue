@@ -8,8 +8,6 @@
 #include <iomanip>
 #include <algorithm>
 
-#define LOWER_BOUND 0
-#define UPPER_BOUND 1
 using namespace std;
 
 class RouteUser {
@@ -20,16 +18,12 @@ public:
 };
 
 class UserData {
-private:
-    vector<RouteUser> data={};
 public:
+    vector<RouteUser> data={};
+
     UserData(){}
     int ParseCSV(string file_name);
     void PrintData();
-    int SearchPosition(time_t timestamp, int op);
-    void LessThan(time_t timestamp);
-    void GreaterThan(time_t timestamp);
-    void Between(time_t ltimestamp, time_t utimestamp);
     void SortData();
 };
 
@@ -81,77 +75,81 @@ void UserData::PrintData() {
     return;
 }
 
-int UserData::SearchPosition(time_t timestamp, int bound) { // op -> 0: return lower bound , 1: return upper bound
-    int l = 0, h = data.size() - 1;
-    switch (bound) {
-        case LOWER_BOUND:
-            while (l <= h) {
-                int m = l + (h - l) / 2;
-                if (data[m].timestamp < timestamp) {
-                    l = m + 1;
-                } else if (data[m].timestamp >= timestamp) {
-                    h = m - 1;
-                }
-            }
-            break;
-        case UPPER_BOUND:
-            while (l <= h) {
-                int m = l + (h - l) / 2;
-                if (data[m].timestamp <= timestamp) {
-                    l = m + 1;
-                } else if (data[m].timestamp > timestamp) {
-                    h = m - 1;
-                }
-            }
-            break;
-    }
-    return l;
-}
-
-void UserData::LessThan(time_t timestamp) {
-    int pos = SearchPosition(timestamp, LOWER_BOUND);
-    for (int i = 0; i < pos; i++) {
-        cout << data[i].timestamp << " " << fixed << setprecision(6) << data[i].lon << " " << data[i].lat << " \n";
-    }
-    return;
-}
-
-void UserData::GreaterThan(time_t timestamp) {
-    int pos = SearchPosition(timestamp, UPPER_BOUND);
-    for (int i = pos; i < data.size(); i++) {
-        cout << data[i].timestamp << " " << fixed << setprecision(6) << data[i].lon << " " << data[i].lat << " \n";
-    }
-    return;
-}
-
-void UserData::Between(time_t ltimestamp , time_t utimestamp) {
-    int lpos = SearchPosition(ltimestamp, 0);
-    int upos = SearchPosition(utimestamp, 1);
-    for (int i = lpos; i < upos; i++) {
-        cout << data[i].timestamp << " " << fixed << setprecision(6) << data[i].lon << " " << data[i].lat << " \n";
-    }
-    return;
-}
-
 void UserData::SortData() {
     sort(data.begin(), data.end(), [&](RouteUser x, RouteUser y) { return x.timestamp < y.timestamp; });
 }
 
-int main() {
-    UserData UserData[2]; // 0:route_user_1.csv  1:route_user2.csv
-    vector<string> filename = {"../data/route_user_1.csv", "../data/route_user_2.csv"};
-    for (int i = 0; i < 2; i++) {
-        if (UserData[i].ParseCSV(filename[i]) < 0) {
-            cout << "Parse " << filename[i] << " failed.\n";
-        } else {
-            UserData[i].SortData(); // Spec says the data are sorted, but I found route_user_1.csv is not sorted
+int lower_bound(UserData &user, time_t timestamp) {
+    int l = 0, h = user.data.size() - 1;
+    while (l <= h) {
+        int m = l + (h - l) / 2;
+        if (user.data[m].timestamp < timestamp) {
+            l = m + 1;
+        } else if (user.data[m].timestamp >= timestamp) {
+            h = m - 1;
         }
     }
+    return l;
+}
 
-    //UserData[0].PrintData();
-    //UserData[0].LessThan(1511398745);
-    //UserData[0].GreaterThan(1511398787);
-    //UserData[0].Between(1511398745, 1511398787);
+int upper_bound(UserData &user, time_t timestamp) {
+    int l = 0, h = user.data.size() - 1;
+    while (l <= h) {
+        int m = l + (h - l) / 2;
+        if (user.data[m].timestamp <= timestamp) {
+            l = m + 1;
+        } else if (user.data[m].timestamp > timestamp) {
+            h = m - 1;
+        }
+    }
+    return l;
+}
+
+UserData LessThan(UserData &user, time_t timestamp) {
+    UserData ret;
+    int pos = lower_bound(user,timestamp);
+    for (int i = 0; i < pos; i++) {
+        ret.data.push_back(user.data[i]);
+    }
+    return ret;
+}
+
+UserData GreaterThan(UserData &user, time_t timestamp) {
+    UserData ret;
+    int pos = upper_bound(user,timestamp);
+    for (int i = pos; i < user.data.size(); i++) {
+        ret.data.push_back(user.data[i]);
+    }
+    return ret;
+}
+
+UserData Between(UserData &user, time_t ltimestamp , time_t utimestamp) {
+    UserData ret;
+    int lpos = lower_bound(user,ltimestamp);
+    int upos = upper_bound(user,utimestamp);
+    for (int i = lpos; i < upos; i++) {
+        ret.data.push_back(user.data[i]);
+    }
+    return ret;
+}
+
+int main() {
+    UserData user[2]; // 0:route_user_1.csv  1:route_user2.csv
+    vector<string> filename = {"../data/route_user_1.csv", "../data/route_user_2.csv"};
+    for (int i = 0; i < 2; i++) {
+        if (user[i].ParseCSV(filename[i]) < 0) {
+            cout << "Parse " << filename[i] << " failed.\n";
+        } else {
+            user[i].SortData(); // Spec says the data are sorted, but I found route_user_1.csv is not sorted
+        }
+    }
+    UserData user_Less, user_Greater, user_Between;
+    user_Less = LessThan(user[0],1511398745);
+    user_Greater = GreaterThan(user[0],1511398787);
+    user_Between = Between(user[0],1511398745, 1511398787);
+    //user_Less.PrintData();
+    //user_Between.PrintData();
+    //user_Greater.PrintData();
 
     return 0;
 }
